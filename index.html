@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infragrammar — Construction Lending Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black:   #000000;
+  --white:   #FFFFFF;
+  --off:     #FAFAFA;
+  --mid:     #F2F2F0;
+  --red:     #D10000;
+  --red-dk:  #A80000;
+  --gray6:   #666666;
+  --gray9:   #999999;
+  --grayc:   #CCCCCC;
+  --graye:   #E8E8E8;
+  --bebas:   'Bebas Neue', sans-serif;
+  --cond:    'Barlow Condensed', sans-serif;
+  --mono:    'IBM Plex Mono', monospace;
+}
+html { scroll-behavior: smooth; font-size: 16px; }
+body { background: var(--white); color: var(--black); font-family: var(--cond); overflow-x: hidden; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ── UTILITY ── */
+.mono    { font-family: var(--mono); }
+.bebas   { font-family: var(--bebas); }
+.red     { color: var(--red); }
+.rule-v  { border: none; border-top: 1px solid var(--graye); margin: 0; }
+.rule-bold { border: none; border-top: 2px solid var(--black); }
+.rule-red  { border: none; border-top: 3px solid var(--red); }
+
+/* ── SCROLL REVEAL ── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(8px);
+  border-top: 3px solid var(--red);
+  border-bottom: 1px solid var(--graye);
+  transition: box-shadow 0.2s;
+}
+#nav.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+.nav-inner {
+  max-width: 1320px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2.5rem; height: 56px;
+}
+.nav-logo {
+  font-family: var(--bebas); font-size: 1.4rem;
+  letter-spacing: 0.1em; color: var(--black);
+}
+.nav-logo span { color: var(--red); }
+.nav-links {
+  display: flex; align-items: center; gap: 0;
+}
+.nav-links a {
+  font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gray9); padding: 0 1.25rem;
+  border-right: 1px solid var(--graye);
+  line-height: 56px; display: block;
+  transition: color 0.15s;
+}
+.nav-links a:first-child { border-left: 1px solid var(--graye); }
+.nav-links a:hover { color: var(--black); }
+.nav-cta {
+  font-family: var(--mono); font-size: 0.6rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--black); color: var(--white);
+  border: none; padding: 0.6rem 1.4rem;
+  transition: background 0.15s;
+}
+.nav-cta:hover { background: var(--red); }
+.nav-mobile-btn {
+  display: none; background: none; border: none;
+  font-family: var(--mono); font-size: 0.65rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gray6);
+}
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+#hero {
+  padding-top: 56px;
+  border-bottom: 2px solid var(--black);
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  max-width: 1320px; margin: 0 auto;
+  min-height: calc(100vh - 56px);
+}
+.hero-left {
+  padding: 5rem 3rem 4rem;
+  border-right: 1px solid var(--graye);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.hero-kicker {
+  display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;
+}
+.hero-kicker-line { width: 2.5rem; height: 2px; background: var(--red); flex-shrink: 0; }
+.hero-kicker-text {
+  font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--red);
+}
+.hero-h1 {
+  font-family: var(--bebas);
+  font-size: clamp(5.5rem, 10.5vw, 9rem);
+  line-height: 0.88; letter-spacing: 0.01em;
+  color: var(--black);
+}
+.hero-h1 .h1-red { color: var(--red); display: block; }
+.hero-bottom { }
+.hero-deck {
+  font-family: var(--cond); font-size: 1.15rem;
+  font-weight: 300; line-height: 1.75; color: var(--gray6);
+  max-width: 580px; margin-bottom: 2.5rem;
+  border-top: 1px solid var(--graye); padding-top: 1.75rem;
+}
+.hero-deck strong { color: var(--black); font-weight: 500; }
+.hero-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.btn-primary {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--red); color: var(--white);
+  border: none; padding: 0.85rem 1.75rem;
+  transition: background 0.15s;
+  display: inline-block;
+}
+.btn-primary:hover { background: var(--red-dk); }
+.btn-outline {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: transparent; color: var(--gray6);
+  border: 1px solid var(--grayc); padding: 0.85rem 1.75rem;
+  transition: all 0.15s;
+  display: inline-block;
+}
+.btn-outline:hover { border-color: var(--black); color: var(--black); }
+.btn-black {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--black); color: var(--white);
+  border: none; padding: 0.85rem 1.75rem;
+  transition: background 0.15s;
+  display: inline-block;
+}
+.btn-black:hover { background: #222; }
+
+/* hero right panel */
+.hero-right {
+  background: var(--off);
+  padding: 3rem 2rem;
+  display: flex; flex-direction: column;
+  border-left: 1px solid var(--graye);
+}
+.hero-right-label {
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gray9); padding-bottom: 1rem;
+  border-bottom: 2px solid var(--black); margin-bottom: 0;
+}
+.hero-stat {
+  padding: 1.4rem 0;
+  border-bottom: 1px solid var(--graye);
+}
+.hero-stat:last-of-type { border-bottom: none; }
+.hero-stat-n {
+  font-family: var(--bebas); font-size: 2.8rem;
+  line-height: 1; color: var(--black); margin-bottom: 0.3rem;
+  letter-spacing: 0.02em;
+}
+.hero-stat-n.red { color: var(--red); }
+.hero-stat-l {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.04em; color: var(--gray6);
+  line-height: 1.6;
+}
+.hero-stat-s {
+  font-family: var(--mono); font-size: 0.47rem;
+  color: var(--grayc); margin-top: 0.25rem; letter-spacing: 0.04em;
+}
+.hero-quote-banner {
+  margin-top: auto;
+  background: var(--black); padding: 1.5rem;
+}
+.hero-quote-banner blockquote {
+  font-family: var(--cond); font-size: 0.9rem;
+  font-style: italic; font-weight: 300;
+  line-height: 1.6; color: rgba(255,255,255,0.75);
+  margin-bottom: 0.75rem;
+}
+.hero-quote-banner cite {
+  font-family: var(--mono); font-size: 0.47rem;
+  color: rgba(255,255,255,0.3); letter-spacing: 0.06em;
+  font-style: normal; line-height: 1.6; display: block;
+}
+
+/* ══════════════════════════════════════
+   PROBLEM
+══════════════════════════════════════ */
+#problem {
+  border-bottom: 2px solid var(--black);
+}
+.problem-inner {
+  max-width: 1320px; margin: 0 auto;
+}
+.section-header {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--graye);
+}
+.section-header-left { padding: 4rem 3rem; border-right: 1px solid var(--graye); }
+.section-header-right { padding: 4rem 3rem; }
+.section-tag {
+  font-family: var(--mono); font-size: 0.52rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 1.25rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.section-tag::before { content: '—'; }
+.section-h2 {
+  font-family: var(--bebas);
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 0.92; letter-spacing: 0.015em;
+  color: var(--black);
+}
+.section-h2 em { color: var(--red); font-style: normal; }
+.section-body {
+  font-family: var(--cond); font-size: 1.05rem;
+  font-weight: 300; line-height: 1.8; color: var(--gray6);
+}
+.section-body strong { color: var(--black); font-weight: 500; }
+
+/* problem items grid */
+.problem-items {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+}
+.problem-item {
+  padding: 2.5rem 2rem;
+  border-right: 1px solid var(--graye);
+}
+.problem-item:last-child { border-right: none; }
+.problem-num {
+  font-family: var(--bebas); font-size: 4rem;
+  line-height: 1; color: var(--graye); margin-bottom: 1rem;
+  letter-spacing: 0.02em;
+}
+.problem-title {
+  font-family: var(--cond); font-size: 1.1rem; font-weight: 600;
+  color: var(--black); margin-bottom: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.problem-desc {
+  font-family: var(--cond); font-size: 0.9rem;
+  font-weight: 300; line-height: 1.75; color: var(--gray6);
+}
+/* amrapali band */
+.amrapali-band {
+  background: var(--black); padding: 2.5rem 3rem;
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 3rem; align-items: center;
+  border-top: 1px solid #222;
+}
+.amrapali-label {
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 0.75rem;
+}
+.amrapali-num {
+  font-family: var(--bebas); font-size: 3.5rem;
+  color: var(--white); line-height: 1;
+}
+.amrapali-unit {
+  font-family: var(--mono); font-size: 0.55rem;
+  color: rgba(255,255,255,0.4); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-top: 0.25rem;
+}
+.amrapali-quote blockquote {
+  font-family: var(--cond); font-size: 1.05rem;
+  font-style: italic; font-weight: 300;
+  line-height: 1.65; color: rgba(255,255,255,0.7);
+  margin-bottom: 0.75rem;
+}
+.amrapali-quote cite {
+  font-family: var(--mono); font-size: 0.48rem;
+  color: rgba(255,255,255,0.3); font-style: normal;
+  letter-spacing: 0.06em; line-height: 1.6; display: block;
+}
+
+/* ══════════════════════════════════════
+   SOLUTION
+══════════════════════════════════════ */
+#solution { border-bottom: 2px solid var(--black); }
+.solution-inner { max-width: 1320px; margin: 0 auto; }
+.solution-header {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--graye);
+}
+.solution-header-left { padding: 4rem 3rem; border-right: 1px solid var(--graye); }
+.solution-header-right {
+  padding: 4rem 3rem;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+
+/* three pillars */
+.pillars { display: grid; grid-template-columns: repeat(3, 1fr); }
+.pillar {
+  padding: 3rem 2.5rem;
+  border-right: 1px solid var(--graye);
+  position: relative;
+}
+.pillar:last-child { border-right: none; }
+.pillar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.pillar-i::before   { background: var(--black); }
+.pillar-ii::before  { background: var(--red); }
+.pillar-iii::before { background: var(--gray9); }
+.pillar-roman {
+  font-family: var(--bebas); font-size: 4.5rem;
+  color: var(--graye); line-height: 1; margin-bottom: 1.25rem;
+  letter-spacing: 0.02em;
+}
+.pillar-title {
+  font-family: var(--cond); font-size: 1.05rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--black); margin-bottom: 1rem;
+}
+.pillar-body {
+  font-family: var(--cond); font-size: 0.9rem;
+  font-weight: 300; line-height: 1.8; color: var(--gray6);
+}
+.pillar-tag {
+  display: inline-block; margin-top: 1.5rem;
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid var(--graye); padding: 0.3rem 0.7rem;
+  color: var(--gray9);
+}
+
+/* visit types */
+.visit-types {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--mid);
+  border-top: 1px solid var(--graye);
+}
+.visit-type {
+  padding: 2rem 2.5rem;
+  border-right: 1px solid var(--graye);
+}
+.visit-type:last-child { border-right: none; }
+.visit-label {
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 0.6rem;
+}
+.visit-title {
+  font-family: var(--cond); font-size: 1rem; font-weight: 600;
+  color: var(--black); margin-bottom: 0.5rem;
+}
+.visit-trigger {
+  font-family: var(--mono); font-size: 0.52rem;
+  color: var(--gray9); letter-spacing: 0.04em; margin-bottom: 0.75rem;
+}
+.visit-desc {
+  font-family: var(--cond); font-size: 0.875rem;
+  font-weight: 300; line-height: 1.7; color: var(--gray6);
+}
+
+/* ══════════════════════════════════════
+   REGULATORY
+══════════════════════════════════════ */
+#regulatory { border-bottom: 2px solid var(--black); }
+.regulatory-inner { max-width: 1320px; margin: 0 auto; }
+.reg-top {
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.reg-top-left {
+  padding: 4rem 3rem;
+  border-right: 1px solid var(--graye);
+}
+.reg-top-right {
+  padding: 4rem 3rem;
+  background: var(--off);
+  display: flex; flex-direction: column; gap: 1px;
+}
+.reg-card {
+  background: var(--white); border: 1px solid var(--graye);
+  padding: 1.75rem; margin-bottom: 1rem;
+  position: relative;
+}
+.reg-card:last-child { margin-bottom: 0; }
+.reg-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; bottom: 0; width: 3px;
+  background: var(--red);
+}
+.reg-card-ref {
+  font-family: var(--mono); font-size: 0.48rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 0.6rem;
+}
+.reg-card-title {
+  font-family: var(--cond); font-size: 1rem; font-weight: 600;
+  color: var(--black); margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+.reg-card-body {
+  font-family: var(--cond); font-size: 0.875rem;
+  font-weight: 300; line-height: 1.7; color: var(--gray6);
+}
+.reg-central-statement {
+  font-family: var(--bebas);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 0.92; color: var(--black);
+  margin-top: 2rem;
+}
+.reg-central-statement span { color: var(--red); }
+.reg-bottom {
+  background: var(--black);
+  padding: 2.5rem 3rem;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.reg-bottom-stat {
+  padding: 0 2rem;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+.reg-bottom-stat:first-child { padding-left: 0; }
+.reg-bottom-stat:last-child { border-right: none; }
+.reg-bottom-n {
+  font-family: var(--bebas); font-size: 2.5rem;
+  color: var(--white); line-height: 1; margin-bottom: 0.4rem;
+}
+.reg-bottom-n.red { color: var(--red); }
+.reg-bottom-l {
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.06em; color: rgba(255,255,255,0.35);
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════════════
+   COMPARISON TABLE
+══════════════════════════════════════ */
+#comparison { border-bottom: 2px solid var(--black); }
+.comparison-inner { max-width: 1320px; margin: 0 auto; }
+.comparison-header {
+  padding: 4rem 3rem 3rem;
+  border-bottom: 1px solid var(--graye);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 3rem;
+}
+.comparison-header-left { flex: 1; }
+.comparison-header-right {
+  font-family: var(--cond); font-size: 0.9rem;
+  font-weight: 300; line-height: 1.8; color: var(--gray6);
+  max-width: 420px; flex-shrink: 0;
+}
+.ctable { width: 100%; border-collapse: collapse; }
+.ctable thead tr { border-bottom: 2px solid var(--black); }
+.ctable th {
+  padding: 1.25rem 2rem;
+  font-family: var(--mono); font-size: 0.52rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  font-weight: 500; text-align: left; background: var(--off);
+}
+.ctable th:first-child { width: 18%; border-right: 1px solid var(--graye); }
+.ctable th:nth-child(2) { width: 41%; border-right: 1px solid var(--graye); color: var(--gray9); }
+.ctable th:last-child { width: 41%; color: var(--black); }
+.ctable th .th-badge {
+  display: inline-block; margin-left: 0.5rem;
+  font-size: 0.42rem; letter-spacing: 0.1em;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--graye);
+}
+.ctable td {
+  padding: 1.5rem 2rem;
+  font-family: var(--cond); font-size: 0.95rem;
+  font-weight: 300; line-height: 1.7; vertical-align: top;
+  border-bottom: 1px solid var(--graye);
+}
+.ctable tbody tr:last-child td { border-bottom: none; }
+.ctable td:first-child {
+  font-family: var(--cond); font-size: 0.8rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--black); border-right: 1px solid var(--graye);
+  background: var(--off);
+}
+.ctable td:nth-child(2) {
+  color: #7a3030; border-right: 1px solid var(--graye);
+  background: #fff8f8;
+}
+.ctable td:last-child {
+  color: #1a4a2a;
+  background: #f6fbf8;
+}
+.ctable td strong { font-weight: 600; }
+
+/* ══════════════════════════════════════
+   INTERNATIONAL BENCHMARKING
+══════════════════════════════════════ */
+#benchmarks { border-bottom: 2px solid var(--black); }
+.bench-inner { max-width: 1320px; margin: 0 auto; }
+.bench-header { padding: 4rem 3rem; border-bottom: 1px solid var(--graye); }
+.bench-markets {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+}
+.bench-market {
+  padding: 2.5rem 2rem;
+  border-right: 1px solid var(--graye);
+}
+.bench-market:last-child { border-right: none; }
+.bench-flag {
+  font-family: var(--bebas); font-size: 1.8rem;
+  letter-spacing: 0.05em; color: var(--black);
+  margin-bottom: 0.5rem;
+}
+.bench-market-label {
+  font-family: var(--mono); font-size: 0.48rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gray9); margin-bottom: 1rem;
+  padding-bottom: 0.75rem; border-bottom: 1px solid var(--graye);
+}
+.bench-row {
+  display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.75rem;
+}
+.bench-item {
+  font-family: var(--mono); font-size: 0.52rem;
+  letter-spacing: 0.03em; color: var(--gray6);
+  line-height: 1.5; padding-left: 0.75rem;
+  border-left: 2px solid var(--graye);
+}
+.bench-item.good { border-left-color: var(--black); color: var(--black); font-weight: 500; }
+.bench-india {
+  background: var(--off);
+  border-top: 3px solid var(--red);
+}
+.bench-india .bench-flag { color: var(--red); }
+.bench-india .bench-item.bad { border-left-color: var(--red); color: var(--red); }
+
+/* ══════════════════════════════════════
+   WHO WE SERVE
+══════════════════════════════════════ */
+#serve { border-bottom: 2px solid var(--black); }
+.serve-inner { max-width: 1320px; margin: 0 auto; }
+.serve-header { padding: 4rem 3rem; border-bottom: 1px solid var(--graye); }
+.serve-cards { display: grid; grid-template-columns: repeat(3, 1fr); }
+.serve-card {
+  padding: 3rem 2.5rem;
+  border-right: 1px solid var(--graye);
+  position: relative;
+}
+.serve-card:last-child { border-right: none; }
+.serve-card-tier {
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gray9); margin-bottom: 1.5rem;
+  padding-bottom: 1rem; border-bottom: 1px solid var(--graye);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.tier-badge {
+  font-family: var(--mono); font-size: 0.45rem;
+  letter-spacing: 0.1em; padding: 0.2rem 0.5rem;
+  background: var(--black); color: var(--white);
+}
+.tier-badge.secondary { background: var(--off); color: var(--gray9); border: 1px solid var(--graye); }
+.serve-card-title {
+  font-family: var(--bebas); font-size: 2.2rem;
+  letter-spacing: 0.02em; color: var(--black); margin-bottom: 1rem; line-height: 1;
+}
+.serve-card-body {
+  font-family: var(--cond); font-size: 0.9rem;
+  font-weight: 300; line-height: 1.75; color: var(--gray6);
+  margin-bottom: 1.5rem;
+}
+.serve-pains { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+.serve-pain {
+  font-family: var(--mono); font-size: 0.52rem;
+  letter-spacing: 0.03em; color: var(--gray6);
+  line-height: 1.6; padding-left: 1rem; position: relative;
+}
+.serve-pain::before { content: '—'; position: absolute; left: 0; color: var(--red); }
+
+/* ══════════════════════════════════════
+   PILOT CTA
+══════════════════════════════════════ */
+#pilot {
+  background: #F5F0E6;
+  border-bottom: 2px solid var(--black);
+}
+.pilot-inner {
+  max-width: 1320px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.pilot-left {
+  padding: 5rem 3rem;
+  border-right: 1px solid rgba(0,0,0,0.1);
+}
+.pilot-tag {
+  font-family: var(--mono); font-size: 0.52rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.pilot-h2 {
+  font-family: var(--bebas);
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 0.9; color: var(--black);
+  margin-bottom: 2rem; letter-spacing: 0.01em;
+}
+.pilot-h2 span { color: var(--red); display: block; }
+.pilot-body {
+  font-family: var(--cond); font-size: 1.05rem;
+  font-weight: 300; line-height: 1.8;
+  color: var(--gray6);
+}
+.pilot-body strong { color: var(--black); font-weight: 500; }
+.pilot-right {
+  padding: 5rem 3rem;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.pilot-form { display: flex; flex-direction: column; gap: 0.75rem; }
+.pilot-input-row { display: flex; gap: 0; }
+.pilot-input {
+  flex: 1; padding: 0.9rem 1.25rem;
+  background: var(--white);
+  border: 1px solid var(--grayc);
+  border-right: none;
+  color: var(--black); font-family: var(--mono);
+  font-size: 0.7rem; outline: none;
+  transition: border-color 0.2s;
+}
+.pilot-input::placeholder { color: var(--gray9); }
+.pilot-input:focus { border-color: var(--black); }
+.pilot-submit {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--red); color: var(--white);
+  border: none; padding: 0 1.5rem; cursor: pointer;
+  white-space: nowrap; transition: background 0.15s;
+  flex-shrink: 0;
+}
+.pilot-submit:hover { background: var(--red-dk); }
+.pilot-note {
+  font-family: var(--mono); font-size: 0.48rem;
+  letter-spacing: 0.06em; color: var(--gray9);
+  line-height: 1.7; margin-top: 0.25rem;
+}
+.pilot-criteria {
+  margin-top: 2.5rem;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 2rem;
+}
+.pilot-criteria-label {
+  font-family: var(--mono); font-size: 0.48rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gray9); margin-bottom: 1rem;
+}
+.pilot-criteria-list {
+  list-style: none; display: flex; flex-direction: column; gap: 0.6rem;
+}
+.pilot-criteria-item {
+  font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.04em; color: var(--gray6);
+  line-height: 1.5; display: flex; align-items: flex-start; gap: 0.6rem;
+}
+.pilot-criteria-item::before { content: '✓'; color: var(--red); flex-shrink: 0; }
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+footer {
+  border-top: 3px solid var(--red);
+  background: var(--white);
+}
+.footer-inner {
+  max-width: 1320px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--graye);
+}
+.footer-col {
+  padding: 3rem 2.5rem;
+  border-right: 1px solid var(--graye);
+}
+.footer-col:last-child { border-right: none; }
+.footer-logo {
+  font-family: var(--bebas); font-size: 2rem;
+  letter-spacing: 0.08em; color: var(--black); margin-bottom: 0.75rem;
+}
+.footer-logo span { color: var(--red); }
+.footer-tagline {
+  font-family: var(--mono); font-size: 0.52rem;
+  letter-spacing: 0.08em; color: var(--gray9);
+  line-height: 1.6;
+}
+.footer-col-head {
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--black); margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem; border-bottom: 1px solid var(--graye);
+}
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.footer-link {
+  font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.05em; color: var(--gray9);
+  cursor: pointer; transition: color 0.15s;
+}
+.footer-link:hover { color: var(--red); }
+.footer-reg-box {
+  background: var(--off); border: 1px solid var(--graye);
+  padding: 1.25rem; margin-top: 0;
+}
+.footer-reg-label {
+  font-family: var(--mono); font-size: 0.45rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 0.5rem;
+}
+.footer-reg-text {
+  font-family: var(--mono); font-size: 0.52rem;
+  color: var(--gray6); line-height: 1.7; letter-spacing: 0.03em;
+}
+.footer-bottom {
+  max-width: 1320px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 2.5rem;
+}
+.footer-bottom-l {
+  font-family: var(--mono); font-size: 0.48rem;
+  letter-spacing: 0.08em; color: var(--gray9);
+}
+.footer-bottom-r {
+  font-family: var(--mono); font-size: 0.48rem;
+  letter-spacing: 0.08em; color: var(--red);
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .bench-markets { grid-template-columns: repeat(3, 1fr); }
+  .bench-market:nth-child(3) { border-right: none; }
+  .bench-market:nth-child(4) { border-top: 1px solid var(--graye); }
+  .bench-market:nth-child(5) { border-right: none; border-top: 1px solid var(--graye); }
+  .reg-bottom { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  .reg-bottom-stat { padding: 0; border-right: none; }
+}
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-mobile-btn { display: block; }
+  .hero-grid, .section-header, .solution-header, .reg-top,
+  .pilot-inner, .footer-inner { grid-template-columns: 1fr; }
+  .hero-right { border-left: none; border-top: 1px solid var(--graye); }
+  .section-header-left, .solution-header-left { border-right: none; border-bottom: 1px solid var(--graye); }
+  .reg-top-left { border-right: none; border-bottom: 1px solid var(--graye); }
+  .footer-col { border-right: none; border-bottom: 1px solid var(--graye); }
+  .footer-col:last-child { border-bottom: none; }
+  .problem-items { grid-template-columns: 1fr 1fr; }
+  .problem-item:nth-child(2) { border-right: none; }
+  .problem-item:nth-child(3) { border-top: 1px solid var(--graye); }
+  .problem-item:last-child { border-right: none; border-top: 1px solid var(--graye); }
+  .pillars, .visit-types, .serve-cards { grid-template-columns: 1fr; }
+  .pillar, .visit-type, .serve-card { border-right: none; border-bottom: 1px solid var(--graye); }
+  .bench-markets { grid-template-columns: 1fr 1fr; }
+  .comparison-header { flex-direction: column; gap: 1.5rem; }
+  .amrapali-band { grid-template-columns: 1fr; gap: 1.5rem; }
+  .pilot-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .hero-h1 { font-size: 4.5rem; }
+  .section-h2 { font-size: 3rem; }
+  .reg-bottom { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .nav-inner { padding: 0 1.25rem; }
+  .hero-left, .section-header-left, .section-header-right,
+  .solution-header-left, .solution-header-right,
+  .reg-top-left, .reg-top-right,
+  .pilot-left, .pilot-right,
+  .pillar, .serve-card, .bench-header, .serve-header, .comparison-header { padding: 2.5rem 1.5rem; }
+  .footer-col { padding: 2rem 1.5rem; }
+  .bench-market { padding: 1.75rem 1.5rem; }
+  .problem-items { grid-template-columns: 1fr; }
+  .problem-item { border-right: none; border-bottom: 1px solid var(--graye); }
+  .reg-bottom { grid-template-columns: 1fr; padding: 2rem 1.5rem; gap: 1.5rem; }
+  .reg-central-statement { font-size: 2.5rem; }
+  .bench-markets { grid-template-columns: 1fr; }
+  .pilot-input-row { flex-direction: column; }
+  .pilot-input { border-right: 1px solid rgba(255,255,255,0.12); }
+  .pilot-submit { padding: 0.9rem; }
+  .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+  .ctable { font-size: 0.85rem; }
+  .ctable td, .ctable th { padding: 1rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ NAV ══════ -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Infra<span>grammar</span></a>
+    <div class="nav-links">
+      <a href="#problem">The Problem</a>
+      <a href="#solution">The PIR</a>
+      <a href="#regulatory">Regulatory</a>
+      <a href="#comparison">Before / After</a>
+      <a href="#serve">Who We Serve</a>
+    </div>
+    <button class="nav-mobile-btn">Menu</button>
+    <a href="#pilot" class="nav-cta">Request Pilot →</a>
+  </div>
+</nav>
+
+<!-- ══════ HERO ══════ -->
+<section id="hero">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div>
+        <div class="hero-kicker">
+          <div class="hero-kicker-line"></div>
+          <div class="hero-kicker-text">Construction Lending Intelligence · India</div>
+        </div>
+        <h1 class="hero-h1">
+          The lender<br>
+          cannot see<br>
+          <span class="h1-red">what it funds.</span>
+        </h1>
+      </div>
+      <div class="hero-bottom">
+        <p class="hero-deck reveal">
+          ₹35 lakh crore of construction credit. Every disbursement decision made on the basis of a report produced by 
+          <strong>the developer's own engineer.</strong> Infragrammar gives the lender independent eyes on site — 
+          lender-commissioned, GPS-verified, triangulated against financial flows — before every draw, not after every default.
+        </p>
+        <div class="hero-actions reveal">
+          <a href="#pilot" class="btn-primary">Request an unpaid pilot →</a>
+          <a href="#solution" class="btn-outline">See the PIR format</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-right-label">Market scale — all figures sourced</div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-n">₹4.48L Cr</div>
+        <div class="hero-stat-l">CRE credit outstanding · March 2024</div>
+        <div class="hero-stat-s">Source: RBI Sectoral Deployment of Bank Credit</div>
+      </div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-n">₹27.23L Cr</div>
+        <div class="hero-stat-l">Housing credit outstanding · March 2024</div>
+        <div class="hero-stat-s">Source: RBI</div>
+      </div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-n">1,30,000+</div>
+        <div class="hero-stat-l">RERA-registered projects requiring independent verification · July 2024</div>
+        <div class="hero-stat-s">Source: Economic Survey 2023-24</div>
+      </div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-n red">Oct 2025</div>
+        <div class="hero-stat-l">RBI/2025-26/59 effective — independent engineer certification mandated for every disbursement</div>
+        <div class="hero-stat-s">Source: RBI Project Finance Directions 2025</div>
+      </div>
+      <div class="hero-quote-banner reveal">
+        <blockquote>"Banks acted as mute spectators to diversion which was almost happening evidently in all banking transactions."</blockquote>
+        <cite>Supreme Court of India · Bikram Chatterji v. Union of India · July 23 2019<br>Quoting forensic audit: ₹3,000 crore diverted in Amrapali through 100+ shell companies</cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ PROBLEM ══════ -->
+<section id="problem">
+  <div class="problem-inner">
+    <div class="section-header">
+      <div class="section-header-left">
+        <div class="section-tag">The Structural Failure</div>
+        <h2 class="section-h2 reveal">
+          The word<br>
+          'independent'<br>
+          is <em>structurally</em><br>
+          false.
+        </h2>
+      </div>
+      <div class="section-header-right">
+        <div class="section-body reveal">
+          The LIE report — Lender Independent Engineer report — is the primary risk instrument in Indian construction lending.
+          The engineer is typically nominated by the developer, paid by the developer, and dependent on the developer for future appointments.
+          <br><br>
+          The result is not a credit intelligence instrument. It is a compliance document — a manual checkbox exercise produced after the fact,
+          designed to satisfy a disbursement requirement rather than inform a capital decision.
+          <br><br>
+          <strong>RBI's Project Finance Directions, 2025 now mandate independent certification. The regulation acknowledges the problem. 
+          The market must create the infrastructure to solve it.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="problem-items">
+      <div class="problem-item reveal">
+        <div class="problem-num">01</div>
+        <div class="problem-title">Drawdown Fraud</div>
+        <div class="problem-desc">Funds drawn against phantom progress. Without independent physical verification, the disbursement schedule becomes a fiction the developer controls. The lender's only check is the report the borrower's engineer wrote.</div>
+      </div>
+      <div class="problem-item reveal">
+        <div class="problem-num">02</div>
+        <div class="problem-title">Material Substitution</div>
+        <div class="problem-desc">Inferior materials billed at approved BOQ rates. Once concrete is poured, reinforcement inside cannot be verified without destructive testing. The pre-encasement window is the only verification opportunity — and it is consistently missed.</div>
+      </div>
+      <div class="problem-item reveal">
+        <div class="problem-num">03</div>
+        <div class="problem-title">Fund Diversion</div>
+        <div class="problem-desc">Loan proceeds channelled to non-project purposes. A developer facing liquidity stress can drain escrow through withdrawal requests certified by compliant professionals, while construction stalls. Banks become, in the Supreme Court's words, mute spectators.</div>
+      </div>
+      <div class="problem-item reveal">
+        <div class="problem-num">04</div>
+        <div class="problem-title">Stalled Project Contagion</div>
+        <div class="problem-desc">By the time any single lender triggers an NPA classification, the developer's entire cross-lender portfolio is in distress. India's banking sector gross NPA ratio peaked at 11.5% in March 2018 — construction and real estate were primary contributors.</div>
+      </div>
+    </div>
+
+    <div class="amrapali-band reveal">
+      <div>
+        <div class="amrapali-label">Case on record · Amrapali Group</div>
+        <div class="amrapali-num">₹3,000 Cr</div>
+        <div class="amrapali-unit">Diverted through 100+ shell companies · Supreme Court forensic audit · July 23 2019</div>
+      </div>
+      <div class="amrapali-quote">
+        <blockquote>"Bank of Baroda, Syndicate Bank, Bank of India, Corporation Bank did not monitor utilisation of funds and acted as mute spectators to diversion which was almost happening evidently in all banking transactions."</blockquote>
+        <cite>Supreme Court of India · Bikram Chatterji &amp; Ors v. Union of India &amp; Ors · W.P. 940 of 2017 · Judgment dated July 23 2019
+        <br>42,000+ homebuyers affected · ₹837 crore in forged professional fees via bogus bills · NBCC appointed to complete 45,957 units</cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ SOLUTION ══════ -->
+<section id="solution">
+  <div class="solution-inner">
+    <div class="solution-header">
+      <div class="solution-header-left">
+        <div class="section-tag">The PIR — Project Intelligence Report</div>
+        <h2 class="section-h2 reveal">
+          Three data<br>
+          streams.<br>
+          One <em>verdict.</em>
+        </h2>
+      </div>
+      <div class="solution-header-right">
+        <div class="section-body reveal">
+          The PIR replaces the manual LIE report with a triangulated, lender-commissioned intelligence product.
+          <br><br>
+          <strong>The appointing and paying party is the lender. The developer has no role in the agent's appointment. 
+          This structural independence is the product — not a feature.</strong>
+          <br><br>
+          Three independent data streams converge on a single disbursement verdict: 
+          construction documents, financial flows, and GPS-verified site reality. 
+          Each stream verifies and constrains the others. Divergence between them is the signal.
+        </div>
+      </div>
+    </div>
+
+    <div class="pillars">
+      <div class="pillar pillar-i reveal">
+        <div class="pillar-roman">I</div>
+        <div class="pillar-title">Construction Document Intelligence</div>
+        <div class="pillar-body">
+          BOQs, sanctioned plans, RERA registrations, environmental clearances, and vendor invoices 
+          cross-referenced against declared progress. Every claim in a drawdown application verified 
+          against the documentary record — not taken at face value from the developer's submission.
+        </div>
+        <span class="pillar-tag">Document Verification</span>
+      </div>
+      <div class="pillar pillar-ii reveal">
+        <div class="pillar-roman">II</div>
+        <div class="pillar-title">Financial Flow Intelligence</div>
+        <div class="pillar-body">
+          Disbursement history mapped against physical milestones. When financial progress diverges 
+          from construction progress, a stress flag is generated — before the project formally fails. 
+          This is the NPA early warning function. The signal appears in draw cycle one, not at year three.
+        </div>
+        <span class="pillar-tag">Financial Triangulation</span>
+      </div>
+      <div class="pillar pillar-iii reveal">
+        <div class="pillar-roman">III</div>
+        <div class="pillar-title">GPS-Verified Site Reality</div>
+        <div class="pillar-body">
+          Geolocation-tagged photographic evidence, material stockpile counts, labour and equipment 
+          verification. The physical site as it is — not as the developer reports it. Pre-encasement 
+          window inspections conducted before concrete pours seal the record permanently.
+        </div>
+        <span class="pillar-tag">Site Intelligence</span>
+      </div>
+    </div>
+
+    <div class="visit-types">
+      <div class="visit-type reveal">
+        <div class="visit-label">Visit Type 01</div>
+        <div class="visit-title">Stage-Gate Visit</div>
+        <div class="visit-trigger">Triggered by: disbursement request</div>
+        <div class="visit-desc">Standard protocol for every draw event. Verifies progress claim before capital is released. No disbursement without a stage-gate PIR.</div>
+      </div>
+      <div class="visit-type reveal">
+        <div class="visit-label">Visit Type 02</div>
+        <div class="visit-title">Forensic Visit</div>
+        <div class="visit-trigger">Triggered by: financial anomaly signal</div>
+        <div class="visit-desc">Deployed when progress-to-disbursement ratios diverge or CRILC stress indicators appear. Unannounced. The developer has no advance notice.</div>
+      </div>
+      <div class="visit-type reveal">
+        <div class="visit-label">Visit Type 03</div>
+        <div class="visit-title">Material Window Visit</div>
+        <div class="visit-trigger">Triggered by: pre-encasement schedule</div>
+        <div class="visit-desc">The only point at which embedded materials — reinforcement, insulation, waterproofing — can be verified without destructive testing. Timed before pour, not after.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ REGULATORY ══════ -->
+<section id="regulatory">
+  <div class="regulatory-inner">
+    <div class="reg-top">
+      <div class="reg-top-left">
+        <div class="section-tag">The Regulatory Moment</div>
+        <div class="reg-central-statement reveal">
+          The regulation<br>
+          <span>exists.</span><br>
+          The infrastructure<br>
+          does not.
+        </div>
+        <div class="section-body reveal" style="margin-top: 2rem;">
+          RBI's Project Finance Directions, 2025 (Circular RBI/2025-26/59, 19 June 2025, effective 1 October 2025) 
+          create a unified framework for project finance exposures across all regulated entities — banks, NBFCs, 
+          and All-India Financial Institutions.
+          <br><br>
+          The Directions explicitly mandate independent validation of project progress by certified engineers 
+          as a condition of disbursement. This is the most significant regulatory event in construction lending 
+          since RERA. The requirement exists. <strong>The market requires an infrastructure to deliver it. 
+          That infrastructure is what Infragrammar builds.</strong>
+        </div>
+      </div>
+      <div class="reg-top-right">
+        <div class="reg-card reveal">
+          <div class="reg-card-ref">RBI/2025-26/59 · 19 June 2025 · Clause on Independent Certification</div>
+          <div class="reg-card-title">Milestone-based disbursement tied to independent engineer or architect certification</div>
+          <div class="reg-card-body">No draw without certified progress verification from an independent party — not developer-nominated. The certifier must be structurally independent. Paper-based LIE reports produced by developer-nominated panels do not meet this standard.</div>
+        </div>
+        <div class="reg-card reveal">
+          <div class="reg-card-ref">RBI/2025-26/59 · Digital Database Mandate</div>
+          <div class="reg-card-title">Mandatory digital databases of project finance exposures — updated within 15 days of any material change</div>
+          <div class="reg-card-body">CRILC reporting on a weekly basis. Lender review within 30 days of a credit event. The 2025 Directions require digital-first monitoring infrastructure that the existing LIE report framework cannot provide.</div>
+        </div>
+        <div class="reg-card reveal">
+          <div class="reg-card-ref">RBI/2025-26/59 · Common Loan Agreement Requirement</div>
+          <div class="reg-card-title">Consortium lenders required to share a common loan agreement and monitoring framework</div>
+          <div class="reg-card-body">Addresses the cross-lender opacity that allowed stalled project contagion to propagate invisibly across multiple banking relationships simultaneously. Cross-lender PIR data is the implementation mechanism.</div>
+        </div>
+      </div>
+    </div>
+    <div class="reg-bottom">
+      <div class="reg-bottom-stat reveal">
+        <div class="reg-bottom-n">Oct 2025</div>
+        <div class="reg-bottom-l">Effective date for RBI/2025-26/59<br>Independent certification mandatory</div>
+      </div>
+      <div class="reg-bottom-stat reveal">
+        <div class="reg-bottom-n">15 days</div>
+        <div class="reg-bottom-l">Maximum lag for digital database update<br>after any material project change</div>
+      </div>
+      <div class="reg-bottom-stat reveal">
+        <div class="reg-bottom-n">Weekly</div>
+        <div class="reg-bottom-l">CRILC stress reporting frequency<br>under the new framework</div>
+      </div>
+      <div class="reg-bottom-stat reveal">
+        <div class="reg-bottom-n red">30 days</div>
+        <div class="reg-bottom-l">Mandatory lender review window<br>following any credit event</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ COMPARISON ══════ -->
+<section id="comparison">
+  <div class="comparison-inner">
+    <div class="comparison-header">
+      <div class="comparison-header-left">
+        <div class="section-tag">Before / After</div>
+        <h2 class="section-h2 reveal">
+          What changes when the<br>
+          lender <em>appoints</em><br>
+          the engineer.
+        </h2>
+      </div>
+      <div class="comparison-header-right reveal">
+        In the US, UK, Australia, and Norway, the construction inspector is lender-appointed, 
+        lender-paid, and lender-aligned. India's LIE system is structurally inverted on this point. 
+        The PIR corrects the inversion — one appointment structure change with compounding consequences across every dimension of monitoring quality.
+      </div>
+    </div>
+    <div style="overflow-x: auto;">
+      <table class="ctable reveal">
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>Current LIE Report <span class="th-badge">Status quo</span></th>
+            <th>PIR — Project Intelligence Report <span class="th-badge" style="background: var(--black); color: var(--white); border-color: var(--black);">Infragrammar</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Appointment</td>
+            <td>Developer nominates from approved panel. Developer pays. Developer controls future work flow to the engineer.</td>
+            <td><strong>Lender appoints directly from lender-maintained panel. Lender pays.</strong> Agent's professional incentive is structurally lender-aligned.</td>
+          </tr>
+          <tr>
+            <td>Data Sources</td>
+            <td>Developer-submitted documents. Single site visit. No cross-verification between document claims and physical site.</td>
+            <td><strong>Three triangulated streams:</strong> construction documents, financial flow history, GPS-verified site reality. Each stream constrains the others.</td>
+          </tr>
+          <tr>
+            <td>Visit Timing</td>
+            <td>Pre-announced. Milestone-based at developer convenience. Developer can prepare the site presentation in advance.</td>
+            <td><strong>Stage-gate</strong> (each draw trigger), <strong>forensic</strong> (anomaly-triggered, unannounced), <strong>material window</strong> (pre-encasement only).</td>
+          </tr>
+          <tr>
+            <td>Output Format</td>
+            <td>Manual checkbox. PDF to developer's file. No standardised format. No digital submission. No RBI/2025 compliance pathway.</td>
+            <td><strong>Structured digital report</strong> with GPS-tagged photos, timestamps, and milestone data. Lender-direct delivery. RBI/2025-26/59 compliant format.</td>
+          </tr>
+          <tr>
+            <td>Report Recipient</td>
+            <td>Developer first. Lender receives a filtered view — what the developer chooses to surface from the report.</td>
+            <td><strong>Lender only.</strong> Report is the lender's instrument. Developer receives no copy. Structural independence begins with the delivery chain.</td>
+          </tr>
+          <tr>
+            <td>Early Warning</td>
+            <td>None. Stress is identified at NPA classification — months or years after the divergence between financial and physical progress began.</td>
+            <td><strong>Progress-to-disbursement ratio tracked at every draw.</strong> Divergence flagged at the draw cycle where it first appears — not when the project formally fails.</td>
+          </tr>
+          <tr>
+            <td>Green Credentials</td>
+            <td>No construction-phase verification. Green claims are developer-submitted, reviewed post-completion. Greenwashing risk is systemic and undetectable.</td>
+            <td><strong>Material compliance tracked against EDGE/IGBC specifications</strong> at pre-encasement stage. Green credential status reported in every PIR.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ BENCHMARKS ══════ -->
+<section id="benchmarks">
+  <div class="bench-inner">
+    <div class="bench-header">
+      <div class="section-tag">International Benchmarking</div>
+      <h2 class="section-h2 reveal">
+        Every mature market solved<br>
+        this. <em>Decades ago.</em>
+      </h2>
+    </div>
+    <div class="bench-markets">
+      <div class="bench-market reveal">
+        <div class="bench-flag">USA</div>
+        <div class="bench-market-label">United States</div>
+        <div class="bench-row">
+          <div class="bench-item good">Inspector: lender-appointed</div>
+          <div class="bench-item good">Frequency: before every draw</div>
+          <div class="bench-item good">Digital platforms: Built, Procore</div>
+          <div class="bench-item good">Geolocation-verified photos mandatory</div>
+        </div>
+      </div>
+      <div class="bench-market reveal">
+        <div class="bench-flag">AUS</div>
+        <div class="bench-market-label">Australia</div>
+        <div class="bench-row">
+          <div class="bench-item good">Inspector: lender-appointed</div>
+          <div class="bench-item good">Frequency: each build milestone</div>
+          <div class="bench-item good">Progressive Drawing Fee: $300–500/visit</div>
+          <div class="bench-item good">Payments direct to contractors</div>
+        </div>
+      </div>
+      <div class="bench-market reveal">
+        <div class="bench-flag">UK</div>
+        <div class="bench-market-label">United Kingdom</div>
+        <div class="bench-row">
+          <div class="bench-item good">Inspector: lender-appointed (PRA mandated)</div>
+          <div class="bench-item good">GPS tracking, serial number verification</div>
+          <div class="bench-item good">48–72hr reporting to lender</div>
+          <div class="bench-item good">Risk-based frequency: higher risk = more visits</div>
+        </div>
+      </div>
+      <div class="bench-market reveal">
+        <div class="bench-flag">NOR</div>
+        <div class="bench-market-label">Norway / Scandinavia</div>
+        <div class="bench-row">
+          <div class="bench-item good">Inspector: appointed before financial close</div>
+          <div class="bench-item good">Monthly + pre-encasement standard</div>
+          <div class="bench-item good">Contractual independence from developer</div>
+          <div class="bench-item good">Digital reporting on large projects</div>
+        </div>
+      </div>
+      <div class="bench-market bench-india reveal">
+        <div class="bench-flag">IND</div>
+        <div class="bench-market-label">India — Current State</div>
+        <div class="bench-row">
+          <div class="bench-item bad">Inspector: developer-nominated</div>
+          <div class="bench-item bad">Frequency: periodic, pre-announced</div>
+          <div class="bench-item bad">No digital submission standard</div>
+          <div class="bench-item bad">No cross-lender data sharing</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ WHO WE SERVE ══════ -->
+<section id="serve">
+  <div class="serve-inner">
+    <div class="serve-header">
+      <div class="section-tag">Target Institutions</div>
+      <h2 class="section-h2 reveal">
+        Built for the lenders<br>
+        who carry <em>construction risk.</em>
+      </h2>
+    </div>
+    <div class="serve-cards">
+      <div class="serve-card reveal">
+        <div class="serve-card-tier">
+          01 — Primary Target
+          <span class="tier-badge">First pilots</span>
+        </div>
+        <div class="serve-card-title">Private Sector Banks</div>
+        <div class="serve-card-body">
+          Data-sophisticated, faster procurement cycles, and increasingly active in construction lending 
+          with the strongest institutional motivation to operationalise the RBI/2025-26/59 independent 
+          verification mandate ahead of competitors.
+        </div>
+        <ul class="serve-pains">
+          <li class="serve-pain">Need RBI/2025-26/59 compliance infrastructure in place before October 2025</li>
+          <li class="serve-pain">Want disbursement decisions backed by lender-independent data, not developer-submitted reports</li>
+          <li class="serve-pain">Building ESG-labelled portfolios for green bond issuance — need verified construction credentials</li>
+          <li class="serve-pain">IFC and ADB credit lines increasingly tied to independent monitoring standards</li>
+        </ul>
+      </div>
+      <div class="serve-card reveal">
+        <div class="serve-card-tier">
+          02 — Core Market
+          <span class="tier-badge secondary">12–24 months</span>
+        </div>
+        <div class="serve-card-title">NBFCs & Housing Finance Companies</div>
+        <div class="serve-card-body">
+          The primary funder of mid-market construction — the segment with the highest construction-phase 
+          risk and the weakest current monitoring infrastructure. IL&FS and DHFL demonstrated what happens 
+          when construction-phase opacity meets an asset-liability mismatch.
+        </div>
+        <ul class="serve-pains">
+          <li class="serve-pain">Carry approximately 70% of mid-market construction credit exposure</li>
+          <li class="serve-pain">NHB refinance eligibility increasingly linked to demonstrable monitoring quality</li>
+          <li class="serve-pain">Post-IL&FS/DHFL pressure to show lenders and rating agencies materially better risk management</li>
+          <li class="serve-pain">Construction-phase opacity is the primary driver of their NPA formation</li>
+        </ul>
+      </div>
+      <div class="serve-card reveal">
+        <div class="serve-card-tier">
+          03 — Long Term
+          <span class="tier-badge secondary">Scale phase</span>
+        </div>
+        <div class="serve-card-title">Public Sector Banks</div>
+        <div class="serve-card-body">
+          Largest credit volumes in the system, longest procurement cycles. The scale opportunity 
+          once the PIR is validated through private bank and NBFC pilots and RBI publishes 
+          implementation guidance that makes adoption a compliance necessity.
+        </div>
+        <ul class="serve-pains">
+          <li class="serve-pain">Manual LIE reporting unsustainable at portfolio scale — thousands of active projects</li>
+          <li class="serve-pain">Post-AQR pressure to demonstrate systematic monitoring rigour to RBI supervisors</li>
+          <li class="serve-pain">CRILC digital reporting mandate requires systematic, structured project data</li>
+          <li class="serve-pain">Consortium lending requirements create demand for cross-lender standardised monitoring</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ PILOT CTA ══════ -->
+<section id="pilot">
+  <div class="pilot-inner">
+    <div class="pilot-left">
+      <div class="pilot-tag">90-Day Pilot Programme</div>
+      <h2 class="pilot-h2 reveal">
+        Run the PIR<br>
+        against your<br>
+        <span>existing LIE<br>reports.</span>
+      </h2>
+      <p class="pilot-body reveal">
+        We are selecting <strong>2–3 institutions</strong> for an unpaid pilot programme. 
+        We will run the PIR on live projects from your active construction portfolio, 
+        alongside your existing LIE report process.
+        <br><br>
+        <strong>The comparison is the proof of concept.</strong> You see, on your own portfolio, 
+        the gap between what the LIE report told you and what the PIR found. 
+        That comparison becomes your internal business case for adoption.
+        <br><br>
+        No cost. No commitment. No modification to your existing processes during the pilot.
+      </p>
+    </div>
+    <div class="pilot-right">
+      <div class="pilot-form reveal">
+        <div class="pilot-input-row">
+          <input type="email" class="pilot-input" placeholder="Your institutional email address">
+          <button class="pilot-submit">Request Access →</button>
+        </div>
+        <div class="pilot-note">
+          For private sector banks, NBFCs, and housing finance companies only. 
+          All pilot data remains strictly confidential. 
+          Pilot slots are limited — we are onboarding institutions sequentially.
+        </div>
+      </div>
+      <div class="pilot-criteria reveal">
+        <div class="pilot-criteria-label">What the pilot covers</div>
+        <ul class="pilot-criteria-list">
+          <li class="pilot-criteria-item">PIR run on 2–5 live projects from your active portfolio</li>
+          <li class="pilot-criteria-item">Stage-gate visit at next scheduled drawdown event</li>
+          <li class="pilot-criteria-item">Full triangulation: documents, financial flows, site visit</li>
+          <li class="pilot-criteria-item">Comparison report: PIR findings vs. existing LIE report on same project</li>
+          <li class="pilot-criteria-item">Zero cost. Zero commitment. Zero modification to your current process.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ FOOTER ══════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-col">
+      <div class="footer-logo">Infra<span>grammar</span></div>
+      <div class="footer-tagline">
+        Construction lending intelligence · India<br>
+        The PIR — Project Intelligence Report<br>
+        Lender-commissioned · GPS-verified · RBI/2025-26/59 compliant
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-head">Navigate</div>
+      <ul class="footer-links">
+        <li><a href="#problem" class="footer-link">The Monitoring Gap</a></li>
+        <li><a href="#solution" class="footer-link">The PIR — Project Intelligence Report</a></li>
+        <li><a href="#regulatory" class="footer-link">RBI/2025-26/59 Compliance</a></li>
+        <li><a href="#comparison" class="footer-link">Before / After Comparison</a></li>
+        <li><a href="#benchmarks" class="footer-link">International Benchmarks</a></li>
+        <li><a href="#serve" class="footer-link">Target Institutions</a></li>
+        <li><a href="#pilot" class="footer-link">Request an Unpaid Pilot</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-head">Regulatory Basis</div>
+      <div class="footer-reg-box">
+        <div class="footer-reg-label">RBI (Project Finance) Directions, 2025</div>
+        <div class="footer-reg-text">
+          Circular RBI/2025-26/59 · 19 June 2025<br>
+          Effective: 1 October 2025<br><br>
+          Applies to: All scheduled commercial banks, NBFCs, All-India Financial Institutions<br><br>
+          Mandate: Independent certification of construction progress by certified engineers or architects as a condition of disbursement · Digital project databases updated within 15 days of material change · Weekly CRILC credit event reporting
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-bottom-l">© Infragrammar 2026 · Internal document — not for external circulation beyond the fintech wedge · infragrammar.in</div>
+    <div class="footer-bottom-r">infragrammar.in</div>
+  </div>
+</footer>
+
+<script>
+/* ── NAV SCROLL SHADOW ── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+/* ── SCROLL REVEAL ── */
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, 60);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => observer.observe(el));
+
+/* ── ACTIVE NAV LINK ── */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const activeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      navLinks.forEach(link => {
+        link.style.color = link.getAttribute('href') === `#${id}` ? 'var(--black)' : '';
+      });
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => activeObserver.observe(s));
+
+/* ── PILOT EMAIL ── */
+document.querySelector('.pilot-submit').addEventListener('click', function() {
+  const email = document.querySelector('.pilot-input').value;
+  if (email && email.includes('@')) {
+    this.textContent = 'Received ✓';
+    this.style.background = '#1a4a2a';
+    this.disabled = true;
+  } else {
+    document.querySelector('.pilot-input').style.borderColor = 'var(--red)';
+    setTimeout(() => { document.querySelector('.pilot-input').style.borderColor = ''; }, 1500);
+  }
+});
+</script>
+
+</body>
+</html>
