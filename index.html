@@ -834,8 +834,7 @@ footer {
           <div class="hero-kicker-text">Construction Lending Intelligence · India</div>
         </div>
         <h1 class="hero-h1">
-          The lender<br>
-          cannot see<br>
+          The lender cannot see<br>
           <span class="h1-red">what it funds.</span>
         </h1>
       </div>
@@ -846,7 +845,7 @@ footer {
           lender-commissioned, GPS-verified, triangulated against financial flows — before every draw, not after every default.
         </p>
         <div class="hero-actions reveal">
-          <a href="#pilot" class="btn-primary">Request an unpaid pilot →</a>
+          <a href="mailto:insights@infragrammar.in" class="btn-primary">Request an unpaid pilot →</a>
           <a href="#solution" class="btn-outline">See the PIR format</a>
         </div>
       </div>
@@ -1304,38 +1303,22 @@ footer {
         <span>existing LIE<br>reports.</span>
       </h2>
       <p class="pilot-body reveal">
-        We are selecting <strong>2–3 institutions</strong> for an unpaid pilot programme. 
-        We will run the PIR on live projects from your active construction portfolio, 
-        alongside your existing LIE report process.
+        We're at an early stage. What we need most right now isn't customers — it's honest feedback from people who understand the problem. If construction lending is a meaningful part of your portfolio, we'd like to run the PIR on a handful of your live projects and show you what we see.
         <br><br>
-        <strong>The comparison is the proof of concept.</strong> You see, on your own portfolio, 
-        the gap between what the LIE report told you and what the PIR found. 
-        That comparison becomes your internal business case for adoption.
-        <br><br>
-        No cost. No commitment. No modification to your existing processes during the pilot.
+        No invoice. No ask at the end. Just a conversation about whether this is useful.
       </p>
     </div>
     <div class="pilot-right">
       <div class="pilot-form reveal">
         <div class="pilot-input-row">
-          <input type="email" class="pilot-input" placeholder="Your institutional email address">
-          <button class="pilot-submit">Request Access →</button>
+          <input type="email" class="pilot-input" id="pilot-email" placeholder="Your institutional email address">
+          <button class="pilot-submit" id="pilot-submit">Request Access →</button>
         </div>
         <div class="pilot-note">
           For private sector banks, NBFCs, and housing finance companies only. 
           All pilot data remains strictly confidential. 
           Pilot slots are limited — we are onboarding institutions sequentially.
         </div>
-      </div>
-      <div class="pilot-criteria reveal">
-        <div class="pilot-criteria-label">What the pilot covers</div>
-        <ul class="pilot-criteria-list">
-          <li class="pilot-criteria-item">PIR run on 2–5 live projects from your active portfolio</li>
-          <li class="pilot-criteria-item">Stage-gate visit at next scheduled drawdown event</li>
-          <li class="pilot-criteria-item">Full triangulation: documents, financial flows, site visit</li>
-          <li class="pilot-criteria-item">Comparison report: PIR findings vs. existing LIE report on same project</li>
-          <li class="pilot-criteria-item">Zero cost. Zero commitment. Zero modification to your current process.</li>
-        </ul>
       </div>
     </div>
   </div>
@@ -1423,9 +1406,11 @@ sections.forEach(s => activeObserver.observe(s));
 document.querySelector('.pilot-submit').addEventListener('click', function() {
   const email = document.querySelector('.pilot-input').value;
   if (email && email.includes('@')) {
-    this.textContent = 'Received ✓';
-    this.style.background = '#1a4a2a';
-    this.disabled = true;
+    const subject = encodeURIComponent('Infragrammar Pilot — ' + email);
+    const body = encodeURIComponent('Hi,\n\nI\'d like to learn more about the Infragrammar pilot programme.\n\nMy email: ' + email);
+    window.location.href = 'mailto:insights@infragrammar.in?subject=' + subject + '&body=' + body;
+    this.textContent = 'Opening email ✓';
+    this.style.background = '#134a2d';
   } else {
     document.querySelector('.pilot-input').style.borderColor = 'var(--red)';
     setTimeout(() => { document.querySelector('.pilot-input').style.borderColor = ''; }, 1500);
